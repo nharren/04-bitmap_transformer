@@ -9,9 +9,9 @@
   "scripts": {
     "start": "node index.js",
     "test": "mocha",
-    "lint": "eslint"
+    "lint": "eslint ."
   },
   "keywords": [],
   "author": "",
-  "license": "ISC"
+  "license": "MIT"
 }
