@@ -91,4 +91,7 @@ function Bitmap(buffer) {
       this.pixelArray.push(pixelRow);
     }
   }
+  function getPixel(x, y) {;
+    return this.pixelArray[y][x];
+  }
 }
