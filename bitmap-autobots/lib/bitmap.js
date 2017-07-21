@@ -63,7 +63,7 @@ function Bitmap(buffer) {
     let colorTableSize = this.colorCount * 4;
     for(let i = colorTableOffset; i <= colorTableOffset + colorTableSize; i += 4) {
       let s = buffer.toString('hex', i, i + 4);
-      let colorHexString = s[6] + s[7] + s[4] + s[5] + s[2] + s[3] + s[0] + s[1];
+      let colorHexString = s[4] + s[5] + s[2] + s[3] + s[0] + s[1] + s[6] + s[7];
       this.colors.push(colorHexString);
     }
   }
