@@ -46,4 +46,19 @@ function grayscale(colors) {
   return colors;
 }
 
+function blackWhite(color) {
+  for(var i = 0; i < colors.length; i++) {
+    var color = colors[i];
+    var r = parseInt(color.slice(0, 2), 16);
+    var g = parseInt(color.slice(2, 4), 16);
+    var b = parseInt(color.slice(4, 6), 16);
+    var a = parseInt(color.slice(6, 8), 16);
+
+    if ((r+g+b)/3 < 128) {
+      colors[i] = '000000' + a;
+    } else {
+      colors[i] = 'ffffff' + a;
+    }
+  }
+  return colors;
 }
