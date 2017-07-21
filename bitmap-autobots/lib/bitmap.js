@@ -9,7 +9,7 @@ function Bitmap(filepath) {
     this.buffer = buffer;
     readHeader.call(this, buffer);
     readColorTable.call(this);
-
+    readPixelArray.call(this);
   });
 
   function readHeader(buffer) {
@@ -27,6 +27,26 @@ function Bitmap(filepath) {
     for(var i = colorTableOffset; i <= colorTableOffset + colorTableSize; i+=4) {
       var colorHexString = this.buffer.toString('hex', i, i + 4);
       this.colors.push(colorHexString);
+    }
+  }
+
+  function readPixelArray() {
+    let pixelRowSize = ((this.bitsPerPixel * this.width + 31) / 32) * 4;
+    let pixelArraySize = this.pixelRowSize * Math.abs(this.height);
+
+    let pixelData = this.buffer.slice(this.pixelArrayOffset, pixelArraySize);
+    this.pixelArray = [];
+
+    for (var i = this.height; i >= 0; i--) {
+      let pixelRow = [];
+      let pixelRowData = pixelData.slice(pixelRowSize * i, pixelRowSize);
+
+      for (var j = 0; j < pixelRowSize; j += this.bitsPerPixel) {
+        var pixel = pixelRowData.toString('hex', j, j + this.bitsPerPixel);
+        pixelRow.push(pixel);
+      }
+      
+      this.pixelArray.push(pixelRow);
     }
   }
 }
