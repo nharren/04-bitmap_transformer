@@ -8,8 +8,9 @@ function Bitmap(filepath) {
     if (err) throw err;
     this.buffer = buffer;
     readHeader.call(this, buffer);
-    readColorTable.call(this);
-    readPixelArray.call(this);
+    readBitmapHeader.call(this, buffer);
+    readColorTable.call(this, buffer);
+    readPixelArray.call(this, buffer);
   });
 
   function readHeader(buffer) {
@@ -17,35 +18,71 @@ function Bitmap(filepath) {
     this.size = buffer.readInt32LE(2);
     this.reserved1 = buffer.readInt32LE(6);
     this.reserved2 = buffer.readInt32LE(8);
-    this.pixelArrayOffset = buffer.readInt32LE(10);
+    this.pixelArrayByteOffset = buffer.readInt32LE(10);
   }
 
-  function readColorTable() {
+  function readBitmapHeader(buffer) {
+    this.bitmapHeaderSize = buffer.readUInt32LE(14);
+
+    switch (this.bitmapHeaderSize) {
+    case 40:
+      readBitmapInfoHeader.call(this, buffer);
+      break;
+    case 12:
+    case 16:
+    case 52:
+    case 56:
+    case 108:
+    case 124:
+    default:
+      throw new Error('The bitmap\'s header type is currently unsupported.');
+    }
+  }
+
+  function readBitmapInfoHeader(buffer) {
+    this.width = buffer.readInt32LE(18);
+    this.height = buffer.readInt32LE(22);
+    this.colorPlanes = buffer.readUInt16LE(26);
+    this.bitsPerPixel = buffer.readUInt16LE(28);
+    this.compression = buffer.readUInt32LE(30);
+    this.size = buffer.readUInt32LE(34);
+    this.horizontalResolution = buffer.readInt32LE(38);
+    this.verticalResolution = buffer.readInt32LE(42);
+    this.colorCount = buffer.readUInt32LE(46);
+    this.importantColorCount = buffer.readUInt32LE(50);
+  }
+
+  function readColorTable(buffer) {
     this.colors = [];
-    var colorTableOffset = 14 + this.dibHeaderSize;
-    var colorTableSize = this.colors * 4;
-    for(var i = colorTableOffset; i <= colorTableOffset + colorTableSize; i+=4) {
-      var colorHexString = this.buffer.toString('hex', i, i + 4);
+    let colorTableOffset = 14 + this.bitmapHeaderSize;
+    let colorTableSize = this.colorCount * 4;
+    for(let i = colorTableOffset; i <= colorTableOffset + colorTableSize; i += 4) {
+      let s = buffer.toString('hex', i, i + 4);
+      let colorHexString = s[6] + s[7] + s[4] + s[5] + s[2] + s[3] + s[0] + s[1];
       this.colors.push(colorHexString);
     }
   }
 
-  function readPixelArray() {
-    let pixelRowSize = ((this.bitsPerPixel * this.width + 31) / 32) * 4;
-    let pixelArraySize = this.pixelRowSize * Math.abs(this.height);
+  function readPixelArray(buffer) {    
+    let rowSizeInBytes = Math.ceil(this.bitsPerPixel * this.width / 32) * 4;
+    let bytesPerPixel = this.bitsPerPixel / 8;
 
-    let pixelData = this.buffer.slice(this.pixelArrayOffset, pixelArraySize);
     this.pixelArray = [];
 
-    for (var i = this.height; i >= 0; i--) {
+    for (let row = this.height - 1; row >= 0; row--) {
       let pixelRow = [];
-      let pixelRowData = pixelData.slice(pixelRowSize * i, pixelRowSize);
+      let rowOffset = this.pixelArrayByteOffset + row * rowSizeInBytes;
 
-      for (var j = 0; j < pixelRowSize; j += this.bitsPerPixel) {
-        var pixel = pixelRowData.toString('hex', j, j + this.bitsPerPixel);
-        pixelRow.push(pixel);
+      for (let pixel = 0; pixel < this.width; pixel++) {
+        let pixelOffset =  rowOffset + pixel * bytesPerPixel;
+        
+        if (this.bitsPerPixel < 16) {
+          pixelRow.push(this.colors[buffer.readUInt8(pixelOffset)]);
+        } else {
+          pixelRow.push(buffer.toString('hex', pixelOffset, bytesPerPixel));
+        }
       }
-      
+
       this.pixelArray.push(pixelRow);
     }
   }
