@@ -1,0 +1,3 @@
+# Bitmap Transformer
+
+This project contains three modules which facilitate the transformation of bitmap files. The color module provides support for color manipulation as well as conversion to and from hex strings, the bitmap module parses a bitmap into properties and objects, and the bitmap transformer module provides methods for modifying a bitmap and attaches an assortment of transforms onto the bitmap's prototype.
