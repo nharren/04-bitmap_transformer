@@ -1,25 +1,26 @@
 'use strict';
 
-const fs = require('fs');
 const EventEmitter = require('events');
 
 module.exports = Bitmap;
 
-function Bitmap(filePath) {
-  fs.readFile(filePath, (err, buffer) => {
-    if (err) throw err;
-    
-    this.buffer = buffer;
+function Bitmap(buffer) {
+  readHeader.call(this);
+  readBitmapHeader.call(this);
+  readColorTable.call(this);
+  readPixelArray.call(this);
 
-    readHeader.call(this, buffer);
-    readBitmapHeader.call(this, buffer);
-    readColorTable.call(this, buffer);
-    readPixelArray.call(this, buffer);
+  this.emit('loaded');
 
-    this.emit('loaded');
-  });
+  this.copy = function() {
+    return new Bitmap(Buffer.from(buffer));
+  };
 
-  function readHeader(buffer) {
+  this.getPixel = function(x, y) {
+    return this.pixelArray[y][x];
+  };
+
+  function readHeader() {
     this.type = buffer.toString('utf-8', 0, 2);
     this.size = buffer.readInt32LE(2);
     this.reserved1 = buffer.readInt32LE(6);
@@ -27,7 +28,7 @@ function Bitmap(filePath) {
     this.pixelArrayByteOffset = buffer.readInt32LE(10);
   }
 
-  function readBitmapHeader(buffer) {
+  function readBitmapHeader() {
     this.bitmapHeaderSize = buffer.readUInt32LE(14);
 
     switch (this.bitmapHeaderSize) {
@@ -45,7 +46,7 @@ function Bitmap(filePath) {
     }
   }
 
-  function readBitmapInfoHeader(buffer) {
+  function readBitmapInfoHeader() {
     this.width = buffer.readInt32LE(18);
     this.height = buffer.readInt32LE(22);
     this.colorPlanes = buffer.readUInt16LE(26);
@@ -58,7 +59,7 @@ function Bitmap(filePath) {
     this.importantColorCount = buffer.readUInt32LE(50);
   }
 
-  function readColorTable(buffer) {
+  function readColorTable() {
     this.colors = [];
     let colorTableOffset = 14 + this.bitmapHeaderSize;
     let colorTableSize = this.colorCount * 4;
@@ -69,7 +70,7 @@ function Bitmap(filePath) {
     }
   }
 
-  function readPixelArray(buffer) {    
+  function readPixelArray() {    
     let rowSizeInBytes = Math.ceil(this.bitsPerPixel * this.width / 32) * 4;
     let bytesPerPixel = this.bitsPerPixel / 8;
 
@@ -92,10 +93,6 @@ function Bitmap(filePath) {
       this.pixelArray.push(pixelRow);
     }
   }
-
-  // this.getPixel = function(x, y) {
-  //   return this.pixelArray[y][x];
-  // };
 }
 
 Bitmap.prototype = new EventEmitter();
