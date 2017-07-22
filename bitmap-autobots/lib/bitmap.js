@@ -1,19 +1,19 @@
 'use strict';
 
-const EventEmitter = require('events');
+const Color = require('./color.js');
 
 module.exports = Bitmap;
 
 function Bitmap(buffer) {
+  this.buffer = buffer;
+
   readHeader.call(this);
   readBitmapHeader.call(this);
   readColorTable.call(this);
   readPixelArray.call(this);
 
-  this.emit('loaded');
-
-  this.copy = function() {
-    return new Bitmap(Buffer.from(buffer));
+  this.clone = function() {
+    return new Bitmap(Buffer.from(this.buffer));
   };
 
   this.getPixel = function(x, y) {
@@ -61,32 +61,36 @@ function Bitmap(buffer) {
 
   function readColorTable() {
     this.colors = [];
-    let colorTableOffset = 14 + this.bitmapHeaderSize;
-    let colorTableSize = this.colorCount * 4;
-    for(let i = colorTableOffset; i <= colorTableOffset + colorTableSize; i += 4) {
-      let s = buffer.toString('hex', i, i + 4);
-      let colorHexString = s[4] + s[5] + s[2] + s[3] + s[0] + s[1] + s[6] + s[7];
-      this.colors.push(colorHexString);
+    this.colorTableOffset = 14 + this.bitmapHeaderSize;
+    this.colorTableSize = this.colorCount * 4;
+    
+    for (let i = this.colorTableOffset; i <= this.colorTableOffset + this.colorTableSize; i += 4) {
+      let bgraHex = buffer.toString('hex', i, i + 4);
+      let color = Color.fromBGRAHex(bgraHex);
+      this.colors.push(color);
     }
   }
 
   function readPixelArray() {    
-    let rowSizeInBytes = Math.ceil(this.bitsPerPixel * this.width / 32) * 4;
-    let bytesPerPixel = this.bitsPerPixel / 8;
+    this.rowSizeInBytes = Math.ceil(this.bitsPerPixel * this.width / 32) * 4;
+    this.bytesPerPixel = this.bitsPerPixel / 8;
 
     this.pixelArray = [];
 
     for (let row = this.height - 1; row >= 0; row--) {
       let pixelRow = [];
-      let rowOffset = this.pixelArrayByteOffset + row * rowSizeInBytes;
+      let rowOffset = this.pixelArrayByteOffset + row * this.rowSizeInBytes;
 
       for (let pixel = 0; pixel < this.width; pixel++) {
-        let pixelOffset =  rowOffset + pixel * bytesPerPixel;
+        let pixelOffset =  rowOffset + pixel * this.bytesPerPixel;
         
         if (this.bitsPerPixel < 16) {
-          pixelRow.push(this.colors[buffer.readUInt8(pixelOffset)]);
+          let colorIndex = buffer.readUInt8(pixelOffset);
+          pixelRow.push(this.colors[colorIndex]);
         } else {
-          pixelRow.push(buffer.toString('hex', pixelOffset, bytesPerPixel));
+          let bgraHex = buffer.toString('hex', pixelOffset, this.bytesPerPixel);
+          let color = Color.fromBGRAHex(bgraHex);
+          pixelRow.push(color);
         }
       }
 
@@ -94,5 +98,3 @@ function Bitmap(buffer) {
     }
   }
 }
-
-Bitmap.prototype = new EventEmitter();
