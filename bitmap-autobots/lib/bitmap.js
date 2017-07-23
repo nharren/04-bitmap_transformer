@@ -13,15 +13,11 @@ function Bitmap(buffer) {
   readBitmapHeader.call(this);
   readColorTable.call(this);
   readPixelArray.call(this);
-
-  this.clone = function() {
-    return new Bitmap(Buffer.from(this.buffer));
-  };
-
-  this.getPixel = function(x, y) {
-    return this.pixelArray[y][x];
-  };
 }
+
+Bitmap.prototype.clone = function() {
+  return new Bitmap(Buffer.from(this.buffer));
+};
 
 function readHeader() {
   this.type = this.buffer.toString('utf-8', 0, 2);
@@ -69,7 +65,7 @@ function readColorTable() {
   
   for (let i = this.colorTableOffset; i < this.colorTableOffset + this.colorTableSize; i += 4) {
     let bgraHex = this.buffer.toString('hex', i, i + 4);
-    let color = Color.fromBGRAHex(bgraHex);
+    let color = Color.fromBGRAString(bgraHex);
     this.colors.push(color);
   }
 }
@@ -92,7 +88,7 @@ function readPixelArray() {
         pixelRow.push(this.colors[colorIndex]);
       } else {
         let bgraHex = this.buffer.toString('hex', pixelOffset, this.bytesPerPixel);
-        let color = Color.fromBGRAHex(bgraHex);
+        let color = Color.fromBGRAString(bgraHex);
         pixelRow.push(color);
       }
     }

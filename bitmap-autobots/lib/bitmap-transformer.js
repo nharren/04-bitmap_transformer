@@ -39,7 +39,7 @@ function BitmapTransformer(bitmap) {
   };
 
   this.writePixel = function(x, y, color) {
-    let pixelOffset = bitmap.pixelArrayOffset + (bitmap.height - 1 - y) * bitmap.rowSizeInBytes + x * bitmap.bytesPerPixel;
+    let pixelOffset = bitmap.pixelArrayOffset + (bitmap.height - 1 - y) * bitmap.pixelRowSize + x * bitmap.bytesPerPixel;
     let colorIndex = bitmap.colors.indexOf(color);
 
     if (colorIndex === -1) {

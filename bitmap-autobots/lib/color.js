@@ -3,71 +3,77 @@
 module.exports = Color;
 
 function Color(red, green, blue, alpha = 0) {
+  if (typeof red !== 'number') throw new TypeError('red was not a number');
+  if (typeof green !== 'number') throw new TypeError('green was not a number');
+  if (typeof blue !== 'number') throw new TypeError('blue was not a number');
+
+  if (red < 0 || red > 255) throw new RangeError('red was out of range');
+  if (green < 0 || green > 255) throw new RangeError('green was out of range');
+  if (blue < 0 || blue > 255) throw new RangeError('blue was out of range');
+  
   this.red = red;
   this.green = green;
   this.blue = blue;
   this.alpha = alpha;
-
-  this.getHSL = function() {
-    let redness = this.red / 255;
-    let greenness = this.green / 255;
-    let blueness = this.blue / 255;
-
-    let min = Math.min(redness, greenness, blueness);
-    let max = Math.max(redness, greenness, blueness);
-    let difference = max - min;
-
-    this.hue = difference;
-    this.saturation = difference;
-    this.lightness = (min + max) / 2;
-
-    if (difference === 0) {
-      this.saturation = 0;
-      this.hue = 0;
-    } else {
-      this.saturation = difference / (1 - Math.abs(2 * this.lightness - 1));
-      switch (max) {
-      case redness:
-        this.hue = Math.round(60 * (((greenness - blueness) / difference) % 6));
-        break;
-      case greenness:
-        this.hue = Math.round(60 * (((blueness - redness) / difference) + 2));
-        break;
-      case blueness:
-        this.hue = Math.round(60 * (((redness - greenness) / difference) + 4));
-        break;
-      }
-
-      if (this.hue < 0) {
-        this.hue += 360;
-      }
-    }
-  };
-
-  this.toBGRAString = function() {
-    return toPaddedHex(blue) + toPaddedHex(green) + toPaddedHex(red) + toPaddedHex(alpha);
-  };
-
-  this.toRGBAString = function() {
-    return toPaddedHex(red) + toPaddedHex(green) + toPaddedHex(blue) + toPaddedHex(alpha);
-  };
-
-  this.toGrayscale = function() {
-    let average = Math.round((this.red + this.green + this.blue) / 3);
-    return new Color(average, average, average, this.alpha);
-  };
-
-  this.toInverse = function() {
-    return new Color(255 - this.red, 255 - this.green, 255 - this.blue, this.alpha);
-  };
-
-  this.toBlackAndWhite = function() {
-    let average = Math.round((this.red + this.green + this.blue) / 3);
-    let result = average < 128 ? 0 : 255;
-
-    return new Color(result, result, result, this.alpha);
-  };
 }
+
+Color.prototype.getHSL = function() {
+  let redness = this.red / 255;
+  let greenness = this.green / 255;
+  let blueness = this.blue / 255;
+
+  let min = Math.min(redness, greenness, blueness);
+  let max = Math.max(redness, greenness, blueness);
+  let difference = max - min;
+
+  this.hue = difference;
+  this.saturation = difference;
+  this.lightness = (min + max) / 2;
+
+  if (difference === 0) {
+    this.saturation = 0;
+    this.hue = 0;
+  } 
+  else {
+    this.saturation = difference / (1 - Math.abs(2 * this.lightness - 1));
+      
+    if (max === redness) {
+      this.hue = Math.round(60 * (((greenness - blueness) / difference) % 6));
+    } else if (max === greenness) {
+      this.hue = Math.round(60 * (((blueness - redness) / difference) + 2));
+    } else if (max === blueness) {
+      this.hue = Math.round(60 * (((redness - greenness) / difference) + 4));
+    }
+
+    if (this.hue < 0) {
+      this.hue += 360;
+    }
+  }
+};
+
+Color.prototype.toBGRAString = function() {
+  return toPaddedHex(this.blue) + toPaddedHex(this.green) + toPaddedHex(this.red) + toPaddedHex(this.alpha);
+};
+
+Color.prototype.toRGBAString = function() {
+  return toPaddedHex(this.red) + toPaddedHex(this.green) + toPaddedHex(this.blue) + toPaddedHex(this.alpha);
+};
+
+Color.prototype.toGrayscale = function() {
+  let average = Math.round((this.red + this.green + this.blue) / 3);
+  return new Color(average, average, average, this.alpha);
+};
+
+Color.prototype.toInverse = function() {
+  return new Color(255 - this.red, 255 - this.green, 255 - this.blue, this.alpha);
+};
+
+Color.prototype.toBlackAndWhite = function() {
+  let average = Math.round((this.red + this.green + this.blue) / 3);
+  let result = average < 128 ? 0 : 255;
+
+  return new Color(result, result, result, this.alpha);
+};
 
 function toPaddedHex(channel) {
   channel = channel.toString(16);
@@ -79,7 +85,7 @@ function toPaddedHex(channel) {
   return channel;
 }
 
-Color.fromRGBAHex = function(rgbaHex) {
+Color.fromRGBAString = function(rgbaHex) {
   let red = parseInt(rgbaHex.slice(0, 2), 16);
   let green = parseInt(rgbaHex.slice(2, 4), 16);
   let blue = parseInt(rgbaHex.slice(4, 6), 16);
@@ -88,7 +94,7 @@ Color.fromRGBAHex = function(rgbaHex) {
   return new Color(red, green, blue, alpha);
 };
 
-Color.fromBGRAHex = function(rgbaHex) {
+Color.fromBGRAString = function(rgbaHex) {
   let blue = parseInt(rgbaHex.slice(0, 2), 16);
   let green = parseInt(rgbaHex.slice(2, 4), 16);
   let red = parseInt(rgbaHex.slice(4, 6), 16);
