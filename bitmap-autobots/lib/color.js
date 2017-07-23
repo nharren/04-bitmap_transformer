@@ -67,16 +67,16 @@ function Color(red, green, blue, alpha = 0) {
 
     return new Color(result, result, result, this.alpha);
   };
+}
 
-  function toPaddedHex(channel) {
-    channel = channel.toString(16);
+function toPaddedHex(channel) {
+  channel = channel.toString(16);
 
-    if (channel.length === 1) {
-      return '0' + channel;
-    }
-
-    return channel;
+  if (channel.length === 1) {
+    return '0' + channel;
   }
+
+  return channel;
 }
 
 Color.fromRGBAHex = function(rgbaHex) {

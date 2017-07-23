@@ -39,7 +39,7 @@ function BitmapTransformer(bitmap) {
   };
 
   this.writePixel = function(x, y, color) {
-    let pixelOffset = bitmap.pixelArrayByteOffset + (bitmap.height - 1 - y) * bitmap.rowSizeInBytes + x * bitmap.bytesPerPixel;
+    let pixelOffset = bitmap.pixelArrayOffset + (bitmap.height - 1 - y) * bitmap.rowSizeInBytes + x * bitmap.bytesPerPixel;
     let colorIndex = bitmap.colors.indexOf(color);
 
     if (colorIndex === -1) {
@@ -158,7 +158,7 @@ Bitmap.prototype.shiftSaturation = function(percentage) {
   clone.colors = clone.colors.map(c => {
     c.getHSL();
     let saturation = Math.min(1, Math.max(0, c.saturation + percentage / 100));
-    return Color.fromHSLA(c.hue, saturation, c.lightness, c.alpha);;
+    return Color.fromHSLA(c.hue, saturation, c.lightness, c.alpha);
   });
 
   bitmapTransformer.writeColors();
