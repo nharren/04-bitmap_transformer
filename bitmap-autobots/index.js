@@ -2,7 +2,7 @@
 
 const fs = require('fs');
 const Bitmap = require('./lib/bitmap.js');
-require('./lib/bitmap-transformer.js');
+require('./lib/bitmap-transforms.js');
 
 let checkOutputDirectoryExists = function() {
   return new Promise(function(resolve, reject) {
@@ -51,6 +51,7 @@ checkOutputDirectoryExists()
   .then(loadBitmap, console.error)
   .then(bitmap => createOutput('black-and-white', bitmap, () => bitmap.toBlackAndWhite()), console.error)
   .then(bitmap => createOutput('grayscale', bitmap, () => bitmap.toGrayscale()), console.error)
+  .then(bitmap => createOutput('sepia', bitmap, () => bitmap.toSepia()), console.error)
   .then(bitmap => createOutput('inverse-colors', bitmap, () => bitmap.toInverse()), console.error)
   .then(bitmap => createOutput('flipped-horizontally', bitmap, () => bitmap.flipHorizontally()), console.error)
   .then(bitmap => createOutput('flipped-vertically', bitmap, () => bitmap.flipVertically()), console.error)
