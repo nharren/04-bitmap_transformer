@@ -59,22 +59,6 @@ Color.prototype.toRGBAString = function() {
   return toPaddedHex(this.red) + toPaddedHex(this.green) + toPaddedHex(this.blue) + toPaddedHex(this.alpha);
 };
 
-Color.prototype.toGrayscale = function() {
-  let average = Math.round((this.red + this.green + this.blue) / 3);
-  return new Color(average, average, average, this.alpha);
-};
-
-Color.prototype.toInverse = function() {
-  return new Color(255 - this.red, 255 - this.green, 255 - this.blue, this.alpha);
-};
-
-Color.prototype.toBlackAndWhite = function() {
-  let average = Math.round((this.red + this.green + this.blue) / 3);
-  let result = average < 128 ? 0 : 255;
-
-  return new Color(result, result, result, this.alpha);
-};
-
 function toPaddedHex(channel) {
   channel = channel.toString(16);
 
