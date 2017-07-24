@@ -43,7 +43,19 @@ BitmapTransformer.prototype.writePixels = function() {
 
 BitmapTransformer.prototype.writePixel = function(x, y, color) {
   let pixelOffset = this.bitmap.pixelArrayOffset + (this.bitmap.height - 1 - y) * this.bitmap.pixelRowSize + x * this.bitmap.bytesPerPixel;
-  let colorIndex = this.bitmap.colors.indexOf(color);
+
+  let colorIndex = -1;
+
+  for (var i = 0; i < this.bitmap.colors.length; i++) {
+    let matchesRed = this.bitmap.colors[i].red === color.red;
+    let matchesGreen = this.bitmap.colors[i].green === color.green;
+    let matchesBlue = this.bitmap.colors[i].blue === color.blue;
+
+    if (matchesRed && matchesGreen && matchesBlue) {
+      colorIndex = i;
+      break;
+    }
+  }
 
   if (colorIndex === -1) {
     colorIndex = this.addColor(color);

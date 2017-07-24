@@ -23,3 +23,27 @@ The available transformations are:
 * Redness Shift
 * Greenness Shift
 * Blueness Shift
+
+## CLI
+
+To use the CLI, type `node index.js [filename] [transformation[:parameter]] [transformation[:parameter]] [transformation[:parameter]]` etc.
+
+The transformation arguments are:
+* `bw` -- Black and White
+* `gray` -- Grayscale
+* `sepia` -- Sepia
+* `hflip` -- Horizontal Flip
+* `vflip` -- Vertical Flip
+* `invert` -- Color Inversion
+* `rotc` -- Clockwise Rotation
+* `rotcc` -- Counterclockwise Rotation
+* `hshift:degree` -- Hue Shift
+* `lshift:percentage` -- Lightness Shift
+* `sshift:percentage` -- Saturation Shift
+* `rshift:magnitude` -- Redness Shift
+* `gshift:magnitude` -- Greenness Shift
+* `bshift:magnitude` -- Blueness Shift
+
+The output will be located at `./output/custom.bmp`.
+
+Running the cli without arguments will produce a sample of all transformations.
