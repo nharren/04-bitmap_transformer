@@ -23,3 +23,15 @@ Color.prototype.toBlackAndWhite = function() {
   let result = average < 128 ? 0 : 255;
   return new Color(result, result, result, this.alpha);
 };
+
+Color.prototype.shiftRedness = function(magnitude) {
+  return new Color(Math.max(0, Math.min(255, this.red * magnitude)), this.green, this.blue, this.alpha);
+};
+
+Color.prototype.shiftGreenness = function(magnitude) {
+  return new Color(this.red, Math.max(0, Math.min(255, this.green * magnitude)), this.blue, this.alpha);
+};
+
+Color.prototype.shiftBlueness = function(magnitude) {
+  return new Color(this.red, this.green, Math.max(0, Math.min(255, this.blue * magnitude)), this.alpha);
+};

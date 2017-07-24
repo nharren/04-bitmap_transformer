@@ -143,3 +143,34 @@ Bitmap.prototype.shiftLightness = function(percentage) {
   bitmapTransformer.writeColors();
   return clone;
 };
+
+Bitmap.prototype.shiftRedness = function(magnitude) {
+  let clone = this.clone();
+  let bitmapTransformer = new BitmapTransformer(clone);
+
+  clone.colors = clone.colors.map(c => c.shiftRedness(magnitude));
+
+  bitmapTransformer.writeColors();
+  return clone;
+};
+
+
+Bitmap.prototype.shiftGreenness = function(magnitude) {
+  let clone = this.clone();
+  let bitmapTransformer = new BitmapTransformer(clone);
+
+  clone.colors = clone.colors.map(c => c.shiftGreenness(magnitude));
+
+  bitmapTransformer.writeColors();
+  return clone;
+};
+
+Bitmap.prototype.shiftBlueness = function(magnitude) {
+  let clone = this.clone();
+  let bitmapTransformer = new BitmapTransformer(clone);
+
+  clone.colors = clone.colors.map(c => c.shiftBlueness(magnitude));
+
+  bitmapTransformer.writeColors();
+  return clone;
+};
