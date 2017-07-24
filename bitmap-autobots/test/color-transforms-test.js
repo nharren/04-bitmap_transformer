@@ -16,9 +16,9 @@ describe('Color', function() {
     });
   });
 
-  describe('#toInverse()', () => {
+  describe('#invertColors()', () => {
     it('should return the correct property values.', () => {
-      let inverse = color.toInverse();
+      let inverse = color.invertColors();
       expect(inverse.red).to.equal(245);
       expect(inverse.green).to.equal(235);
       expect(inverse.blue).to.equal(225);

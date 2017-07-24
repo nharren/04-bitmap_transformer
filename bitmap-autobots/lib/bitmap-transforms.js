@@ -1,15 +1,14 @@
 'use strict';
 
-const Color = require('./color.js');
 require('./color-transforms.js');
 const Bitmap = require('./bitmap.js');
 const BitmapTransformer = require('./bitmap-transformer.js');
 
-Bitmap.prototype.toInverse = function() {
+Bitmap.prototype.invertColors = function() {
   let clone = this.clone();
   let bitmapTransformer = new BitmapTransformer(clone);
 
-  clone.colors = clone.colors.map(c => c.toInverse());
+  clone.colors = clone.colors.map(c => c.invertColors());
 
   bitmapTransformer.writeColors();
   return clone;
@@ -73,7 +72,7 @@ Bitmap.prototype.rotateClockwise = function() {
 
   for (var y = 0; y < clone.height; y++) {
     for (var x = 0; x < clone.width; x++) {
-      bitmapTransformer.writePixel(this.height - 1 - y, x, this.pixelArray[y][x]);
+      bitmapTransformer.writePixel(clone.height - 1 - y, x, clone.pixelArray[y][x]);
     }    
   }
 
@@ -86,7 +85,7 @@ Bitmap.prototype.rotateCounterclockwise = function() {
 
   for (var y = 0; y < clone.height; y++) {
     for (var x = 0; x < clone.width; x++) {
-      bitmapTransformer.writePixel(y, this.width - 1 - x, this.pixelArray[y][x]);
+      bitmapTransformer.writePixel(y, clone.width - 1 - x, clone.pixelArray[y][x]);
     }    
   }
 
@@ -97,20 +96,7 @@ Bitmap.prototype.shiftHue = function(degrees) {
   let clone = this.clone();
   let bitmapTransformer = new BitmapTransformer(clone);
 
-  clone.colors = clone.colors.map(c => {
-    c.getHSL();
-    let hue = c.hue + degrees;
-    
-    if (Math.abs(hue) > 360) {
-      hue *= (1 / (hue / 360));
-    }
-
-    if (hue < 0) {
-      hue += 360;
-    }
-    
-    return Color.fromHSLA(hue, c.saturation, c.lightness, c.alpha);
-  });
+  clone.colors = clone.colors.map(c => c.shiftHue(degrees));
 
   bitmapTransformer.writeColors();
   return clone;
@@ -120,11 +106,7 @@ Bitmap.prototype.shiftSaturation = function(percentage) {
   let clone = this.clone();
   let bitmapTransformer = new BitmapTransformer(clone);
 
-  clone.colors = clone.colors.map(c => {
-    c.getHSL();
-    let saturation = Math.min(1, Math.max(0, c.saturation + percentage / 100));
-    return Color.fromHSLA(c.hue, saturation, c.lightness, c.alpha);
-  });
+  clone.colors = clone.colors.map(c => c.shiftSaturation(percentage));
 
   bitmapTransformer.writeColors();
   return clone;
@@ -134,11 +116,7 @@ Bitmap.prototype.shiftLightness = function(percentage) {
   let clone = this.clone();
   let bitmapTransformer = new BitmapTransformer(clone);
 
-  clone.colors = clone.colors.map(c => {
-    c.getHSL();
-    let lightness = Math.min(1, Math.max(0, c.lightness + percentage / 100));
-    return Color.fromHSLA(c.hue, c.saturation, lightness, c.alpha);
-  });
+  clone.colors = clone.colors.map(c => c.shiftLightness(percentage));
 
   bitmapTransformer.writeColors();
   return clone;

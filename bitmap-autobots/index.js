@@ -26,9 +26,9 @@ let createOutputDirectory = function() {
   });
 };
 
-let loadBitmap = function() {
+let loadBitmap = function(filename) {
   return new Promise(function(resolve, reject) {
-    fs.readFile(`${__dirname}/assets/palette-bitmap.bmp`, function(err, buffer) {
+    fs.readFile(filename, function(err, buffer) {
       if (err) reject(err);
       resolve(new Bitmap(buffer));
     });
@@ -46,13 +46,82 @@ let createOutput = function(fileName, bitmap, func) {
   });
 };
 
+let filePath = process.argv[2];
+let transforms = process.argv.slice(3);
+
+if (filePath && transforms) {
+  checkOutputDirectoryExists()
+    .catch(createOutputDirectory)
+    .then(() => loadBitmap(filePath))
+    .then(bitmap => {
+      while (transforms.length > 0) {
+        let transform = transforms.shift();
+        let transformParts = transform.split(':');
+
+        switch (transformParts[0]) {
+        case 'bw':
+          bitmap = bitmap.toBlackAndWhite();
+          break;
+        case 'hflip':
+          bitmap = bitmap.flipHorizontally();
+          break;
+        case 'vflip':
+          bitmap = bitmap.flipVertically();
+          break;
+        case 'gray':
+          bitmap = bitmap.toGrayscale();
+          break;
+        case 'invert':
+          bitmap = bitmap.invertColors();
+          break;
+        case 'rotc':
+          bitmap = bitmap.rotateClockwise();
+          break;
+        case 'rotcc':
+          bitmap = bitmap.rotateCounterclockwise();
+          break;
+        case 'sepia':
+          bitmap = bitmap.toSepia();
+          break;
+        case 'bshift':
+          bitmap = bitmap.shiftBlueness(Number(transformParts[1]));
+          break;
+        case 'gshift':
+          bitmap = bitmap.shiftGreenness(Number(transformParts[1]));
+          break;
+        case 'rshift':
+          bitmap = bitmap.shiftRedness(Number(transformParts[1]));
+          break;
+        case 'sshift':
+          bitmap = bitmap.shiftSaturation(Number(transformParts[1]));
+          break;
+        case 'hshift':
+          bitmap = bitmap.shiftHue(Number(transformParts[1]));
+          break;
+        case 'lshift':
+          bitmap = bitmap.shiftLightness(Number(transformParts[1]));
+          break;
+        default:
+          break;
+        }
+      }
+
+      createOutput('custom', bitmap, () => bitmap);
+
+    })
+    .catch(err => console.error(err));
+
+  return;
+}
+
+
 checkOutputDirectoryExists()
   .catch(createOutputDirectory)
-  .then(loadBitmap, console.error)
+  .then(() => loadBitmap(`${__dirname}/assets/palette-bitmap.bmp`), console.error)
   .then(bitmap => createOutput('black-and-white', bitmap, () => bitmap.toBlackAndWhite()), console.error)
   .then(bitmap => createOutput('grayscale', bitmap, () => bitmap.toGrayscale()), console.error)
   .then(bitmap => createOutput('sepia', bitmap, () => bitmap.toSepia()), console.error)
-  .then(bitmap => createOutput('inverted-colors', bitmap, () => bitmap.toInverse()), console.error)
+  .then(bitmap => createOutput('inverted-colors', bitmap, () => bitmap.invertColors()), console.error)
   .then(bitmap => createOutput('flipped-horizontally', bitmap, () => bitmap.flipHorizontally()), console.error)
   .then(bitmap => createOutput('flipped-vertically', bitmap, () => bitmap.flipVertically()), console.error)
   .then(bitmap => createOutput('rotate-clockwise', bitmap, () => bitmap.rotateClockwise()), console.error)
