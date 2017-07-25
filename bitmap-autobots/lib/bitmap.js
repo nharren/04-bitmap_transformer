@@ -1,5 +1,6 @@
 'use strict';
 
+require('./buffer-extensions.js');
 const Color = require('./color.js');
 
 module.exports = Bitmap;
@@ -21,85 +22,85 @@ Bitmap.prototype.clone = function() {
 
 function readHeader() {
   this.type = this.buffer.toString('utf-8', 0, 2);
-  this.size = this.buffer.readInt32LE(2);
-  this.reserved1 = this.buffer.readInt32LE(6);
-  this.reserved2 = this.buffer.readInt32LE(8);
-  this.pixelArrayOffset = this.buffer.readInt32LE(10);
+  this.size = this.buffer.readInt32(2);
+  this.reserved1 = this.buffer.readInt32(6);
+  this.reserved2 = this.buffer.readInt32(8);
+  this.pixelArrayOffset = this.buffer.readInt32(10);
 }
 
 function readBitmapHeader() {
-  this.bitmapHeaderSize = this.buffer.readUInt32LE(14);
+  this.bitmapHeaderSize = this.buffer.readUInt32(14);
 
   if (this.bitmapHeaderSize === 12) {
     readBitmapCoreHeader.call(this);
     return;
   }
 
-  this.colorPlanes = this.buffer.readUInt16LE(26);
-  this.bitsPerPixel = this.buffer.readUInt16LE(28);
-  this.compression = this.buffer.readUInt32LE(30);
-  this.size = this.buffer.readUInt32LE(34);
-  this.colorCount = this.buffer.readUInt32LE(46);
-  this.importantColorCount = this.buffer.readUInt32LE(50);
+  this.colorPlanes = this.buffer.readUInt16(26);
+  this.bitsPerPixel = this.buffer.readUInt16(28);
+  this.compression = this.buffer.readUInt32(30);
+  this.size = this.buffer.readUInt32(34);
+  this.colorCount = this.buffer.readUInt32(46);
+  this.importantColorCount = this.buffer.readUInt32(50);
 
   if (this.bitmapHeaderSize === 16 || this.bitmapHeaderSize === 64) {
     readOS22BitmapHeader.call(this);
     return;
   }
   
-  this.width = this.buffer.readInt32LE(18);
-  this.height = this.buffer.readInt32LE(22);
-  this.horizontalResolution = this.buffer.readInt32LE(38);
-  this.verticalResolution = this.buffer.readInt32LE(42);
+  this.width = this.buffer.readInt32(18);
+  this.height = this.buffer.readInt32(22);
+  this.horizontalResolution = this.buffer.readInt32(38);
+  this.verticalResolution = this.buffer.readInt32(42);
   
   if (this.bitmapHeaderSize === 40) {
     return;
   } 
 
-  this.redMask = this.buffer.readUInt32LE(54);
-  this.greenMask = this.buffer.readUInt32LE(58);
-  this.blueMask = this.buffer.readUInt32LE(62);
-  this.alphaMask = this.buffer.readUInt32LE(66);
-  this.colorSpaceType = this.buffer.readUInt32LE(70);
+  this.redMask = this.buffer.readUInt32(54);
+  this.greenMask = this.buffer.readUInt32(58);
+  this.blueMask = this.buffer.readUInt32(62);
+  this.alphaMask = this.buffer.readUInt32(66);
+  this.colorSpaceType = this.buffer.readUInt32(70);
   this.endpoints = getCIEXYZTriple(this.buffer.slice(74, 110));
-  this.gammaRed = this.buffer.readUInt32LE(110);
-  this.gammaGreen = this.buffer.readUInt32LE(114);
-  this.gammaBlue = this.buffer.readUInt32LE(118);
-  this.intent = this.buffer.readUInt32LE(122);
-  this.profileData = this.buffer.readUInt32LE(126);
-  this.profileSize = this.buffer.readUInt32LE(130);
-  this.reserved = this.buffer.readUInt32LE(134);
+  this.gammaRed = this.buffer.readUInt32(110);
+  this.gammaGreen = this.buffer.readUInt32(114);
+  this.gammaBlue = this.buffer.readUInt32(118);
+  this.intent = this.buffer.readUInt32(122);
+  this.profileData = this.buffer.readUInt32(126);
+  this.profileSize = this.buffer.readUInt32(130);
+  this.reserved = this.buffer.readUInt32(134);
 }
 
 function readBitmapCoreHeader() {
-  this.width = this.buffer.readUInt16LE(18);
-  this.height = this.buffer.readUInt16LE(20);
-  this.colorPlanes = this.buffer.readUInt16LE(22);
-  this.bitsPerPixel = this.buffer.readUInt16LE(24);
+  this.width = this.buffer.readUInt16(18);
+  this.height = this.buffer.readUInt16(20);
+  this.colorPlanes = this.buffer.readUInt16(22);
+  this.bitsPerPixel = this.buffer.readUInt16(24);
 }
 
 function readOS22BitmapHeader() {
-  this.width = this.buffer.readUInt32LE(18);
-  this.height = this.buffer.readUInt32LE(22);
-  this.horizontalResolution = this.buffer.readUInt32LE(38);
-  this.verticalResolution = this.buffer.readUInt32LE(42);
+  this.width = this.buffer.readUInt32(18);
+  this.height = this.buffer.readUInt32(22);
+  this.horizontalResolution = this.buffer.readUInt32(38);
+  this.verticalResolution = this.buffer.readUInt32(42);
 
   let short = this.bitmapHeaderSize == 16;
 
-  this.resolutionUnit = short ? 0 : this.buffer.readUInt16LE(54);
-  this.reserved = short ? 0 : this.buffer.readUInt16LE(56);
-  this.orientation = short ? 0 : this.buffer.readUInt16LE(58);
-  this.halftoning = short ? 0 : this.buffer.readUInt16LE(60);
-  this.halftoneSize1 = short ? 0 : this.buffer.readUInt32LE(62);
-  this.halftoneSize2 = short ? 0 : this.buffer.readUInt32LE(66);
-  this.colorSpace = short ? 0 : this.buffer.readUInt32LE(70);
-  this.appData = short ? 0 : this.buffer.readUInt32LE(74);
+  this.resolutionUnit = short ? 0 : this.buffer.readUInt16(54);
+  this.reserved = short ? 0 : this.buffer.readUInt16(56);
+  this.orientation = short ? 0 : this.buffer.readUInt16(58);
+  this.halftoning = short ? 0 : this.buffer.readUInt16(60);
+  this.halftoneSize1 = short ? 0 : this.buffer.readUInt32(62);
+  this.halftoneSize2 = short ? 0 : this.buffer.readUInt32(66);
+  this.colorSpace = short ? 0 : this.buffer.readUInt32(70);
+  this.appData = short ? 0 : this.buffer.readUInt32(74);
 }
 
 function getCIEXYZTriple(buffer) {
-  let red = new CIEXYZ(buffer.readFloatLE(0), buffer.readFloatLE(4), buffer.readFloatLE(8));
-  let green = new CIEXYZ(buffer.readFloatLE(12), buffer.readFloatLE(16), buffer.readFloatLE(20));
-  let blue = new CIEXYZ(buffer.readFloatLE(24), buffer.readFloatLE(28), buffer.readFloatLE(32));
+  let red = new CIEXYZ(buffer.readFloat(0), buffer.readFloat(4), buffer.readFloat(8));
+  let green = new CIEXYZ(buffer.readFloat(12), buffer.readFloat(16), buffer.readFloat(20));
+  let blue = new CIEXYZ(buffer.readFloat(24), buffer.readFloat(28), buffer.readFloat(32));
 
   return new CIEXYZTriple(red, green, blue);
 }
